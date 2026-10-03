@@ -1,0 +1,11 @@
+data/
+*.tcia
+
+mc.exe
+mc
+
+.env
+
+airflow/logs/
+*.log
+

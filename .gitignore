@@ -1,11 +1,9 @@
-data/
+.data/
 *.tcia
+
+data/
 
 mc.exe
 mc
 
 .env
-
-airflow/logs/
-*.log
-

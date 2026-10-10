@@ -11,13 +11,12 @@
 **Хранилище (Data Lake)**  
 MinIO - S3 (coollabsio/minio)
 
-**ETL**  
-Airflow + Pandas + Pydicom (для DICOM) + OpenCV/Pillow (хз ещё не выбрала)
+**T**  
+Pandas + Pydicom (для DICOM) + OpenCV/Pillow (хз ещё не выбрала)
 
 **ML-слой**  
 для обуч и cnn PyTorch  
 U-Net - сегментация   
-мб ещё добавлю 
 
 **Веб-интерфейс и Бэкенд**  
 FastApi + SQLAlchemy + Pydantic  

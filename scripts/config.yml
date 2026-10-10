@@ -1,0 +1,5 @@
+path_to_save:
+  data\raw\ready_made_img
+
+path_to_open:
+  data\raw\save_from_s3

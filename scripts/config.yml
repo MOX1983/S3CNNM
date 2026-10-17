@@ -1,5 +1,13 @@
-path_to_save:
-  data\raw\ready_made_img
+path:
+  to_save_full:
+    .data\raw\ready_made_img\full
+  to_save_mask:
+    .data\raw\ready_made_img\mask
+  minio_load:
+    .data\raw\save_from_s3
+  bucket_name_raw:
+    dicom-data
+  bucket_name_good:
+    datasets
 
-path_to_open:
-  data\raw\save_from_s3
+

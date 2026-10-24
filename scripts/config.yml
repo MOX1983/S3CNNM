@@ -9,5 +9,7 @@ path:
     dicom-data
   bucket_name_good:
     datasets
+  prefix:
+    manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM
 
 

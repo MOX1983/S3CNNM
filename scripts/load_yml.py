@@ -20,7 +20,7 @@ class PathConfig:
     bucket_name_raw: str
     bucket_name_good: str
     prefix: str
-
+    csv: list
 
 @dataclass
 class ClientS3:
@@ -40,6 +40,7 @@ def load_yml(path: str = "config.yml"):
             data["path"]["bucket_name_raw"],
             data["path"]["bucket_name_good"],
             data["path"]["prefix"],
+            data["path"]["csv"]
         )
 
 
@@ -48,3 +49,4 @@ config = load_yml()
 configClient = ClientS3(
     os.getenv("ACCESS_KEY"), os.getenv("SECRET_ACCESS_KEY"), os.getenv("ENDPOINT_URL")
 )
+

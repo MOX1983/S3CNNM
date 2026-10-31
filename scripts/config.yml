@@ -11,5 +11,8 @@ path:
     datasets
   prefix:
     manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM
+  csv:
+    - calc_case_description_test_set.csv
+    - calc_case_description_train_set.csv
 
 

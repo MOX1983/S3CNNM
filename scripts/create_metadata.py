@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 import pandas as pd
 
-from converting_to_png import dicom_to_png
+from converting_to_png import dicom_full_to_png, dicom_mask_to_png
 from load_yml import config
 from s3_client import get_bytes_body_obj, get_create_s3_client, upload_file_in_bucket
 
@@ -10,7 +10,7 @@ from s3_client import get_bytes_body_obj, get_create_s3_client, upload_file_in_b
 def merge_path(page: dict) -> dict:
     img_path = defaultdict(list)
     page = page["Contents"]
-    pref_file = ("_1", "_2", "_3", "_4")
+    pref_file = tuple([f"_{i}" for i in range(1, 10)])
     for obj in page:
         key = obj["Key"]
         path = key.split("/")
@@ -39,15 +39,16 @@ def merge_img(img_path: dict) -> dict:
     '''
     save_img_path = defaultdict(list)
     for key, val in img_path.items():
-        ind = 0
+        ind = 1
         for one in val:
             obj = get_bytes_body_obj(config.bucket_name_raw, one)
             if one.endswith("1-1.dcm"):
                 path_to_save = config.to_save_full + str(key) + ".png"
+                dicom_full_to_png(obj, path_to_save)
             else:
                 path_to_save = config.to_save_mask + str(key) + f"_{ind}.png"
+                dicom_mask_to_png(obj, path_to_save)
                 ind += 1
-            dicom_to_png(obj, path_to_save)
             save_img_path[key].append(path_to_save)
     print(f"Done\t{datetime.now()}\t{merge_img.__name__}")
     return dict(save_img_path)
@@ -98,7 +99,7 @@ image_path	mask_path	patient_id	pathology	abnormality_type	assessment	breast_den
     print(df_path_file.head())
     df_path_file.info()
 
-    name_file_csv = f"datasetV{idx}.csv"
+    name_file_csv = f"datasetV{idx}-1.csv"
     df_path_file.to_csv(path_or_buf=config.to_save_dir + name_file_csv, index=False)
     print(f"Done\t{datetime.now()}\t{metadata_file.__name__}")
     return name_file_csv
@@ -113,12 +114,14 @@ if __name__ == "__main__":
                          Filename=config.path_minio_load + "\\" + config.csv[1])
     paginator = client.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=config.bucket_name_raw, Prefix=config.prefix)
-    i = 0
+    all_path_from_s3 = {}
+    v = 3
     for page in pages:
         path_from_s3 = merge_path(page)
         print(f"\n path_from_s3\n{path_from_s3} \n")
-        data_path_img = merge_img(path_from_s3)
-        print(f"\n data_path_img\n{data_path_img} \n")
-        name_file_csv = metadata_file(data_path_img, i)
-        upload_file_in_bucket(config.to_save_dir + name_file_csv, config.bucket_name_good, name_file_csv)
-        i += 1
+        all_path_from_s3 = {**all_path_from_s3, **path_from_s3}
+    data_path_img = merge_img(all_path_from_s3)
+    print(f"\n data_path_img\n{data_path_img} \n")
+    name_file_csv = metadata_file(data_path_img, v)
+    upload_file_in_bucket(config.to_save_dir + name_file_csv, config.bucket_name_good, name_file_csv)
+

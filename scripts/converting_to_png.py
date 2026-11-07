@@ -3,17 +3,33 @@ from datetime import datetime
 
 import pydicom
 from PIL import Image
+import numpy as np
 
 
-def dicom_to_png(dicom_bytes: bytes, png_filename: str) -> None:
+def dicom_full_to_png(dicom_bytes: bytes, png_filename: str) -> None:
     full_path_to_save = png_filename
     obj = io.BytesIO(dicom_bytes)
 
     try:
         arr = pydicom.dcmread(obj).pixel_array
         arr = arr.astype("float")
-        arr = (arr - arr.min()) / (arr.max() - arr.min()) * 255
-        arr = arr.astype("uint8")
+        arr = (arr - arr.min()) / (arr.max() - arr.min() + 1e-8) * 65535.0
+        arr = arr.astype(np.uint16)
+        image = Image.fromarray(arr)
+        image.save(full_path_to_save)
+        print(f"save\t{datetime.now()}\t{full_path_to_save}")
+    except FileNotFoundError as e:
+        print(e)
+    obj.truncate()
+
+def dicom_mask_to_png(dicom_bytes: bytes, png_filename: str) -> None:
+    full_path_to_save = png_filename
+    obj = io.BytesIO(dicom_bytes)
+
+    try:
+        arr = pydicom.dcmread(obj).pixel_array
+        arr = arr.astype("float")
+        arr = np.where(arr > 0, 255, 0).astype(np.uint8)
         image = Image.fromarray(arr)
         image.save(full_path_to_save)
         print(f"save\t{datetime.now()}\t{full_path_to_save}")

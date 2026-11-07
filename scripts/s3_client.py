@@ -36,3 +36,7 @@ def get_obj(bucket: str, key: str):
 
 def get_bytes_body_obj(bucket: str, key: str) -> bytes:
     return get_obj(bucket, key)["Body"].read()
+
+def upload_file_in_bucket(local_upload_file: str, bucket: str, key: str):
+    client = get_create_s3_client()
+    return client.upload_file(local_upload_file, bucket, key)

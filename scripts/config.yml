@@ -3,6 +3,8 @@ path:
     .data\raw\ready_made_img\full
   to_save_mask:
     .data\raw\ready_made_img\mask
+  to_save_dir:
+    .data\raw\ready_made_img
   minio_load:
     .data\raw\save_from_s3
   bucket_name_raw:

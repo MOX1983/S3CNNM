@@ -16,6 +16,7 @@ load_dotenv(PATH_TO_ENV)
 class PathConfig:
     to_save_full: str
     to_save_mask: str
+    to_save_dir: str
     path_minio_load: str
     bucket_name_raw: str
     bucket_name_good: str
@@ -36,6 +37,7 @@ def load_yml(path: str = "config.yml"):
         return PathConfig(
             global_path + data["path"]["to_save_full"] + "\\",
             global_path + data["path"]["to_save_mask"] + "\\",
+            global_path + data["path"]["to_save_dir"] + "\\",
             global_path + data["path"]["minio_load"] + "\\",
             data["path"]["bucket_name_raw"],
             data["path"]["bucket_name_good"],

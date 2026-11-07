@@ -1,5 +1,20 @@
-path_to_save:
-  data\raw\ready_made_img
+path:
+  to_save_full:
+    .data\raw\ready_made_img\full
+  to_save_mask:
+    .data\raw\ready_made_img\mask
+  to_save_dir:
+    .data\raw\ready_made_img
+  minio_load:
+    .data\raw\save_from_s3
+  bucket_name_raw:
+    dicom-data
+  bucket_name_good:
+    datasets
+  prefix:
+    manifest-ZkhPvrLo5216730872708713142/CBIS-DDSM
+  csv:
+    - calc_case_description_test_set.csv
+    - calc_case_description_train_set.csv
 
-path_to_open:
-  data\raw\save_from_s3
+

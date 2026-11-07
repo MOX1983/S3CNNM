@@ -1,22 +1,42 @@
 import boto3
 from botocore.exceptions import ClientError
-import os
-from dotenv import load_dotenv
-from pathlib import Path
 
+from load_yml import configClient
 
-PATH_TO_ENV = Path(__file__).parent.parent / ".env"
-load_dotenv(PATH_TO_ENV)
 
 def get_create_s3_resource():
     try:
-        s3 = boto3.resource('s3',
-                          aws_access_key_id=os.getenv("ACCESS_KEY"),
-                          aws_secret_access_key=os.getenv("SECRET_ACCESS_KEY"),
-                          endpoint_url=os.getenv("ENDPOINT_URL")
-                          )
+        s3 = boto3.resource(
+            "s3",
+            aws_access_key_id=configClient.ACCESS_KEY,
+            aws_secret_access_key=configClient.SECRET_ACCESS_KEY,
+            endpoint_url=configClient.ENDPOINT_URL,
+        )
     except ClientError as e:
         raise f"ERROR {e}"
     return s3
 
 
+def get_create_s3_client() -> boto3.session.Session.client:
+    try:
+        return boto3.client(
+            "s3",
+            aws_access_key_id=configClient.ACCESS_KEY,
+            aws_secret_access_key=configClient.SECRET_ACCESS_KEY,
+            endpoint_url=configClient.ENDPOINT_URL,
+        )
+    except ClientError as e:
+        raise f"ERROR {e}"
+
+
+def get_obj(bucket: str, key: str):
+    client = get_create_s3_client()
+    return client.get_object(Bucket=bucket, Key=key)
+
+
+def get_bytes_body_obj(bucket: str, key: str) -> bytes:
+    return get_obj(bucket, key)["Body"].read()
+
+def upload_file_in_bucket(local_upload_file: str, bucket: str, key: str):
+    client = get_create_s3_client()
+    return client.upload_file(local_upload_file, bucket, key)

@@ -12,7 +12,7 @@
 MinIO - S3 (coollabsio/minio)
 
 **T**  
-Pandas + Pydicom (для DICOM) + OpenCV/Pillow (хз ещё не выбрала)
+Pandas + Pydicom (для DICOM)
 
 **ML-слой**  
 для обуч и cnn PyTorch  

@@ -22,6 +22,7 @@ class PathConfig:
     bucket_name_good: str
     prefix: str
     csv: list
+    name_new_csv: str
 
 @dataclass
 class ClientS3:
@@ -42,7 +43,8 @@ def load_yml(path: str = "config.yml"):
             data["path"]["bucket_name_raw"],
             data["path"]["bucket_name_good"],
             data["path"]["prefix"],
-            data["path"]["csv"]
+            data["path"]["csv"],
+            data["name_new_csv"]
         )
 
 

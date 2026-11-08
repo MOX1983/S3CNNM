@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 import pandas as pd
 
-from converting_to_png import dicom_full_to_png, dicom_mask_to_png
+from converting_to_png import dicom_full_to_png, dicom_mask_to_png, merge_img_in_one
 from load_yml import config
 from s3_client import get_bytes_body_obj, get_create_s3_client, upload_file_in_bucket
 
@@ -53,18 +53,26 @@ def merge_img(img_path: dict) -> dict:
     print(f"Done\t{datetime.now()}\t{merge_img.__name__}")
     return dict(save_img_path)
 
+def merge_masks(save_img_path:dict)->dict:
+    '''
+    return :
+    {"patient_id": [path_full, path_mask] ...}
+    '''
+    for k, v in save_img_path.items():
+        path_img = [v[0]]
+        path_img.append(merge_img_in_one(v[1:]))
+        save_img_path[k] = path_img
+    print(f"Done\t{datetime.now()}\t{merge_masks.__name__}")
+    return save_img_path
 
-def metadata_file(path_img: dict, idx: int) -> str:
-    """а птом через пандас сделать csv  который хранит
-image_path	mask_path	patient_id	pathology	abnormality_type	assessment	breast_density"""
+
+def metadata_file(path_img: dict) -> str:
     pd.set_option("display.max_columns", None)
     df_path_img = pd.DataFrame.from_dict(data=path_img, orient="index").reset_index()
     col = list(df_path_img.columns)
-    new_col = ["id", "full"]
-    mask_col = [f"mask_{i}" for i in col[2:]]
-    new_col += mask_col
+    new_col = ["id", "full", "mask"]
     df_path_img = df_path_img.rename(columns=dict(zip(col, new_col)))
-    df_not_path = df_path_img[df_path_img["full"].isna() | df_path_img["mask_1"].isna()]
+    df_not_path = df_path_img[df_path_img["full"].isna() | df_path_img["mask"].isna()]
     df_path_img = df_path_img[~df_path_img["id"].isin(df_not_path["id"])].fillna(value="null")
     df_path_img["side"] = df_path_img["id"].replace(r"\w_\d{5}_", "", regex=True).replace(r"_\w{2,3}", "", regex=True)
     df_path_img["view"] = df_path_img["id"].replace(r".{12,13}_", "", regex=True)
@@ -92,18 +100,16 @@ image_path	mask_path	patient_id	pathology	abnormality_type	assessment	breast_den
 
     df_path_file = df_path_img.merge(df_file, how="left", on=["patient_id", "side", "view"])
     need_col = ["patient_id", "side", "view", "pathology",
-                "abnormality_type", "assessment", "breast_density", "full"] + mask_col
+                "abnormality_type", "assessment", "breast_density", "full", "mask"]
     df_path_file = df_path_file[need_col]
     df_path_file = df_path_file.drop_duplicates()
 
     print(df_path_file.head())
     df_path_file.info()
 
-    name_file_csv = f"datasetV{idx}-1.csv"
-    df_path_file.to_csv(path_or_buf=config.to_save_dir + name_file_csv, index=False)
+    df_path_file.to_csv(path_or_buf=config.to_save_dir + config.name_new_csv, index=False)
     print(f"Done\t{datetime.now()}\t{metadata_file.__name__}")
-    return name_file_csv
-
+    return config.name_new_csv
 
 
 if __name__ == "__main__":
@@ -115,13 +121,13 @@ if __name__ == "__main__":
     paginator = client.get_paginator("list_objects_v2")
     pages = paginator.paginate(Bucket=config.bucket_name_raw, Prefix=config.prefix)
     all_path_from_s3 = {}
-    v = 3
     for page in pages:
         path_from_s3 = merge_path(page)
-        print(f"\n path_from_s3\n{path_from_s3} \n")
+        print(f"{datetime.now()}\n path_from_s3\n{path_from_s3} \n")
         all_path_from_s3 = {**all_path_from_s3, **path_from_s3}
     data_path_img = merge_img(all_path_from_s3)
-    print(f"\n data_path_img\n{data_path_img} \n")
-    name_file_csv = metadata_file(data_path_img, v)
+    print(f"{datetime.now()}\n data_path_img\n{data_path_img} \n")
+    data_path_img = merge_masks(data_path_img)
+    print(f"{datetime.now()}\n merge_masks\n{data_path_img} \n")
+    name_file_csv = metadata_file(data_path_img)
     upload_file_in_bucket(config.to_save_dir + name_file_csv, config.bucket_name_good, name_file_csv)
-

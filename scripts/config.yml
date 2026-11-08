@@ -17,4 +17,6 @@ path:
     - calc_case_description_test_set.csv
     - calc_case_description_train_set.csv
 
+name_new_csv: datasetV4.csv
+
 

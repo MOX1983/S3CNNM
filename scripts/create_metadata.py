@@ -60,6 +60,7 @@ def merge_masks(save_img_path:dict)->dict:
     '''
     for k, v in save_img_path.items():
         path_img = [v[0]]
+        print(v[1:], len(v[1:]))
         path_img.append(merge_img_in_one(v[1:]))
         save_img_path[k] = path_img
     print(f"Done\t{datetime.now()}\t{merge_masks.__name__}")
@@ -72,7 +73,7 @@ def metadata_file(path_img: dict) -> str:
     col = list(df_path_img.columns)
     new_col = ["id", "full", "mask"]
     df_path_img = df_path_img.rename(columns=dict(zip(col, new_col)))
-    df_not_path = df_path_img[df_path_img["full"].isna() | df_path_img["mask"].isna()]
+    df_not_path = df_path_img[df_path_img["full"].replace('', pd.NA).isna() | df_path_img["mask"].replace('', pd.NA).isna()]
     df_path_img = df_path_img[~df_path_img["id"].isin(df_not_path["id"])].fillna(value="null")
     df_path_img["side"] = df_path_img["id"].replace(r"\w_\d{5}_", "", regex=True).replace(r"_\w{2,3}", "", regex=True)
     df_path_img["view"] = df_path_img["id"].replace(r".{12,13}_", "", regex=True)
@@ -110,7 +111,6 @@ def metadata_file(path_img: dict) -> str:
     df_path_file.to_csv(path_or_buf=config.to_save_dir + config.name_new_csv, index=False)
     print(f"Done\t{datetime.now()}\t{metadata_file.__name__}")
     return config.name_new_csv
-
 
 if __name__ == "__main__":
     client = get_create_s3_client()

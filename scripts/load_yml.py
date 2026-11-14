@@ -31,8 +31,8 @@ class ClientS3:
     ENDPOINT_URL: str
 
 
-def load_yml(path: str = "config.yml"):
-    with open(path, "r") as f:
+def load_yml(path: str = "scripts\\config.yml"):
+    with open(global_path + path, "r") as f:
         data = safe_load(f)
 
         return PathConfig(

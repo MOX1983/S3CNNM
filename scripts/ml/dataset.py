@@ -5,9 +5,8 @@ import numpy as np
 from PIL import Image
 
 class DatasetScan(Dataset):
-    def __init__(self, path_to_file: str, path_to_dir: str, patch_size: int = 512, probability: float = 0.7):
-        self.df = pd.read_csv(path_to_file, header=0)
-        self.path_to_dir = path_to_dir
+    def __init__(self, df: pd.DataFrame, patch_size: int = 512, probability: float = 0.7):
+        self.df = df.reset_index(drop=True)
         self.patch_size = patch_size
         self.probability = probability
     def __len__(self):

@@ -3,15 +3,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class TwoCnnLayers(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, dropout_p=0.1):
         super().__init__()
         self.model = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
+            nn.LeakyReLU(0.01, inplace=True),
+            nn.Dropout2d(dropout_p),
             nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
-            nn.ReLU(inplace=True),
             nn.BatchNorm2d(out_channels),
+            nn.LeakyReLU(0.01, inplace=True)
         )
     def forward(self, x):
         return self.model(x)
@@ -29,7 +30,12 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.convT = nn.ConvTranspose2d(in_channels, out_channels, 2, stride=2)
+        self.convT = nn.Sequential(
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True),
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.LeakyReLU(0.01, inplace=True)
+        )
         self.block = TwoCnnLayers(in_channels, out_channels)
     def forward(self, x, y):
         x = self.convT(x)

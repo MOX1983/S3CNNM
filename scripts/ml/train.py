@@ -28,8 +28,8 @@ def train_model(epochs: int = 30, batch_size: int = 4, accum_steps: int = 4, lr:
     val_df = df.iloc[val_idx]
     logging.info(f"len train: {len(train_df)}, len val: {len(val_df)}")
 
-    train_dataset = DatasetScan(train_df, patch_size=512, probability=0.75)
-    val_dataset = DatasetScan(val_df, patch_size=512, probability=1.0)
+    train_dataset = DatasetScan(train_df, patch_size=512, probability=0.5, repeats=2, train=True)
+    val_dataset = DatasetScan(val_df, patch_size=512, probability=0.5, repeats=1, train=False)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=2, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2, pin_memory=True)
@@ -37,7 +37,7 @@ def train_model(epochs: int = 30, batch_size: int = 4, accum_steps: int = 4, lr:
     model = UNetModel(in_channels=1, out_channels=1).to(device)
     criterion = ComboLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5, patience=3)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="max", factor=0.5, patience=5)
 
     best_val_dice = 0.0
     save_model_path = config.to_save_dir + "\\" + config.name_model
@@ -108,4 +108,4 @@ def train_model(epochs: int = 30, batch_size: int = 4, accum_steps: int = 4, lr:
             logging.info(f"save best model {best_val_dice:.4f}")
 
 if __name__ == "__main__":
-    train_model(epochs=30, batch_size=2, accum_steps=4 ,lr=1e-4)
+    train_model(epochs=30, batch_size=2, accum_steps=4, lr=1e-4)

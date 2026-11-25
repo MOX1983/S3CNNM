@@ -67,9 +67,12 @@ def view( test_mack_path: str, orig_img, pred_mask, prob_map):
     plt.colorbar(im, ax=ax[1], fraction=0.046)
 
     ax[2].imshow(orig_img, cmap="gray")
+    test_mask = np.array(Image.open(test_mack_path))
+    ax[2].imshow(test_mask, cmap="gray", alpha=0.5)
     red_overlay = np.zeros((*pred_mask.shape, 4), dtype=np.float32)
-    red_overlay[pred_mask > 0] = [1.0, 0.0, 0.0, 1.0]
+    red_overlay[pred_mask > 0] = [1.0, 0.0, 0.0, 0.5]
     ax[2].imshow(red_overlay)
+
 
     plt.tight_layout()
     plt.show()
@@ -84,6 +87,6 @@ def main(test_image_path:str, test_mack_path:str):
 
 
 if __name__ == "__main__":
-    test_image_path = r"D:\S3CNNM\.data\raw\ready_made_img\full\P_00162_LEFT_CC.png"
-    test_mack_path = r"D:\S3CNNM\.data\raw\ready_made_img\mask\P_00162_LEFT_CC.png"
+    test_image_path = r"D:\S3CNNM\.data\raw\ready_made_img\full\P_02420_RIGHT_CC.png"
+    test_mack_path = r"D:\S3CNNM\.data\raw\ready_made_img\mask\P_02420_RIGHT_CC.png"
     main(test_image_path, test_mack_path)

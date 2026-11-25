@@ -1,6 +1,6 @@
 import io
 from datetime import datetime
-
+import os
 import pydicom
 from PIL import Image
 import numpy as np
@@ -38,10 +38,41 @@ def dicom_mask_to_png(dicom_bytes: bytes, png_filename: str) -> None:
     obj.truncate()
 
 
-# test
-# path = r"D:\S3CNNM\data\raw\Calc-Test_P_00038_LEFT_CC_1\08-29-2017-DDSM-NA-94942\1.000000-ROI mask images-18515\1-2.dcm" # это нужно
-# path = r"D:\S3CNNM\data\raw\Calc-Test_P_00038_LEFT_CC_1\08-29-2017-DDSM-NA-94942\1.000000-ROI mask images-18515\1-1.dcm"
-# path = r"D:\S3CNNM\data\raw\Calc-Test_P_00038_LEFT_CC\08-29-2017-DDSM-NA-96009\1.000000-full mammogram images-63992\1-1.dcm" # это нужно
+def merge_img_in_one(l_img: list) -> str:
+    if len(l_img) == 0:
+        return ''
+    if len(l_img) == 1:
+        path_img = l_img[0][:-6] + ".png"
+        img = Image.open(l_img[0])
+        img.save(path_img)
+        os.remove(l_img[0])
+        print(f"merge and save\t{datetime.now()}\t{path_img}")
+        return path_img
+    path_img = l_img[0][:-6] + ".png"
+    curr_img = Image.open(l_img[0])
+    target_size = curr_img.size
+    curr_img = np.array(curr_img)
+    os.remove(l_img[0])
+    while l_img[1:]:
+        rm_img = l_img.pop()
+        curr = Image.open(rm_img)
+        if curr.size != target_size:
+            curr = curr.resize(target_size, Image.NEAREST)
+        curr = np.array(curr)
+        curr_img = np.bitwise_or(curr_img, curr)
+        os.remove(rm_img)
+    img = Image.fromarray(curr_img)
+    img.save(path_img)
+    print(f"merge and save\t{datetime.now()}\t{path_img}")
+    return path_img
 
-# path = r"D:\S3CNNM\data\raw\Calc-Test_P_00038_LEFT_MLO\08-29-2017-DDSM-NA-17613\1.000000-full mammogram images-97934\1-1.dcm"
-# dicom_to_png(path, r"D:\S3CNNM\data\raw\Calc-Test_P_00038_LEFT_MLO\08-29-2017-DDSM-NA-17613\1.000000-full mammogram images-97934\ml1-1.png")
+
+#test
+# l = [r"D:\S3CNNM\data\raw\ready_made_img\P_00008_LEFT_CC_1.png",
+#      r"D:\S3CNNM\data\raw\ready_made_img\P_00008_LEFT_CC_2.png"]
+#
+# l = [r"D:\S3CNNM\data\raw\ready_made_img\P_00005_RIGHT_MLO_1.png",
+#      r"D:\S3CNNM\data\raw\ready_made_img\P_00007_LEFT_CC_1.png",
+#      r"D:\S3CNNM\data\raw\ready_made_img\P_00030_LEFT_CC_1.png"]
+#
+# print(merge_img_in_one(l))

@@ -22,3 +22,9 @@ U-Net - сегментация
 FastApi + SQLAlchemy + Pydantic  
 Postgrsql   
 React
+
+
+
+
+
+cnn, relu, batch norm, Max Pool, ConvTranspose2d
